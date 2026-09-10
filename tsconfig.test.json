@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["tests/**/*", "src/**/*"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "verbatimModuleSyntax": false,
+    "noUncheckedSideEffectImports": false
+  }
+}
