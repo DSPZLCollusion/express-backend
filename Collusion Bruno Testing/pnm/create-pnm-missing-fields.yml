@@ -1,0 +1,42 @@
+info:
+  name: create-pnm-missing-fields
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}"
+  body:
+    type: json
+    data: |-
+      {
+        "info": {
+          "first_name": "Jane"
+        },
+        "on_campus": {
+          "dorm": "SPEED",
+          "room_number": "101"
+        },
+        "off_campus": null,
+        "interests": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function() {
+          expect(res.status).to.equal(400);
+        });
+
+        test("body has error message", function() {
+          expect(res.body.error).to.equal("first_name, last_name, and email are required");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

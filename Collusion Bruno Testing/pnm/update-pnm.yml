@@ -1,0 +1,47 @@
+info:
+  name: update-pnm
+  type: http
+  seq: 8
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/{{pnmId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "info": {
+          "first_name": "Jane",
+          "last_name": "Smith",
+          "email": "jane.smith@example.com",
+          "phone_number": "5025550199",
+          "class_year": "SOPHOMORE",
+          "status_type": "DELTA"
+        },
+        "on_campus": {
+          "dorm": "MEES",
+          "room_number": "202"
+        },
+        "off_campus": null,
+        "interests": ["Soccer"]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function() {
+          expect(res.status).to.equal(200);
+        });
+
+        test("response contains updated id", function() {
+          expect(res.body).to.have.property("id");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

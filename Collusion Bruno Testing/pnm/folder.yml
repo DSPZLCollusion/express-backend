@@ -1,0 +1,12 @@
+info:
+  name: /pnm
+  type: folder
+  seq: 1
+
+request:
+  auth:
+    type: bearer
+    token: "{{authToken}}"
+  variables:
+    - name: baseUrl
+      value: 127.0.0.1:8080/pnm

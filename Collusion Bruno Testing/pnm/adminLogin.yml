@@ -1,0 +1,32 @@
+info:
+  name: adminLogin
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: 127.0.0.1:8080/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "username": "admin_user",
+        "password": "password123"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const token = res.body?.token;
+                if (token) {
+                  bru.setVar("authToken", token);
+                }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

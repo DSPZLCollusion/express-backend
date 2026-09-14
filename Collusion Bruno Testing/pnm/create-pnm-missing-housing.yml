@@ -1,0 +1,43 @@
+info:
+  name: create-pnm-missing-housing
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}"
+  body:
+    type: json
+    data: |-
+      {
+        "info": {
+          "first_name": "Jane",
+          "last_name": "Doe",
+          "email": "jane.doe@example.com",
+          "phone_number": "5025550101",
+          "class_year": "FRESHMAN"
+        },
+        "on_campus": null,
+        "off_campus": null,
+        "interests": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function() {
+          expect(res.status).to.equal(400);
+        });
+
+        test("body has error message", function() {
+          expect(res.body.error).to.equal("housing type needs to be defined.");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
