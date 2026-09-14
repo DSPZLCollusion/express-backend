@@ -2,7 +2,7 @@
 -- seed.sql
 -- Sample data for local development and testing.
 -- Safe to re-run: existing rows are skipped via ON CONFLICT DO NOTHING.
--- Run AFTER V8__migrate.sql (or V1–V7) has been applied.
+-- Run AFTER V10__migrate.sql (or V1–V9) has been applied.
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -146,3 +146,26 @@ INSERT INTO pnm_interests (pnm_id, interest_id)
 SELECT p.id, i.id FROM pnms p, interests i
 WHERE p.email = 'priya.sharma@uni.edu'   AND i.interest_name IN ('Engineering', 'Film', 'Gaming')
 ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Users & Roles
+-- Sample password hashes use bcrypt with 10 rounds for 'password123'
+-- ---------------------------------------------------------------------------
+
+INSERT INTO users (username, email, password_hash) VALUES
+    ('admin_user', 'admin@example.com', '$2b$10$w0s2hBqV8k4eR5gO7/0eG.b1F5kKkV5V8F7U5XkYnE3mP2lQq1.ae'),
+    ('dic_user',   'dic@example.com',   '$2b$10$w0s2hBqV8k4eR5gO7/0eG.b1F5kKkV5V8F7U5XkYnE3mP2lQq1.ae'),
+    ('std_user',   'user@example.com',  '$2b$10$w0s2hBqV8k4eR5gO7/0eG.b1F5kKkV5V8F7U5XkYnE3mP2lQq1.ae')
+ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role_name)
+SELECT user_id, 'ADMIN'::role FROM users WHERE username = 'admin_user'
+ON CONFLICT (user_id, role_name) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role_name)
+SELECT user_id, 'DIC'::role FROM users WHERE username = 'dic_user'
+ON CONFLICT (user_id, role_name) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role_name)
+SELECT user_id, 'USER'::role FROM users WHERE username = 'std_user'
+ON CONFLICT (user_id, role_name) DO NOTHING;

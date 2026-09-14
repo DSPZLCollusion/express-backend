@@ -1,7 +1,7 @@
 -- =============================================================================
--- V8__migrate.sql
+-- V10__migrate.sql
 -- Idempotent full-schema migration.
--- Wraps every prior step (V1–V7) with existence checks so this file can be
+-- Wraps every prior step (V1–V9) with existence checks so this file can be
 -- run against a blank database OR one that already has some objects in place.
 -- =============================================================================
 
@@ -42,6 +42,12 @@ DO $$ BEGIN
         'SPEED', 'BSB', 'BLUMBERG', 'MEES', 'DEMING',
         'SCHARPENBERG', 'LAKESIDE', 'PERCOPO',
         'APARTMENTS WEST', 'APARTMENTS EAST', 'TBA'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    CREATE TYPE role AS ENUM (
+        'USER', 'DIC', 'ADMIN'
     );
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -139,3 +145,26 @@ GROUP BY
     off_campus_housing.city,
     off_campus_housing.state,
     off_campus_housing.zip_code;
+
+-- ---------------------------------------------------------------------------
+-- V8 – users
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS users (
+    user_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username      VARCHAR(255) NOT NULL UNIQUE,
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL
+);
+
+-- ---------------------------------------------------------------------------
+-- V9 – user_roles (junction)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id     BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    role_name   role NOT NULL DEFAULT 'USER',
+    PRIMARY KEY (user_id, role_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);

@@ -42,3 +42,9 @@ CREATE TYPE dorm AS ENUM (
     'APARTMENTS EAST',
     'TBA'
     );
+
+CREATE TYPE role as ENUM (
+    'USER',
+    'DIC',
+    'ADMIN'
+);
