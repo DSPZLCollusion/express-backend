@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 
 import healthRoute from "./routes/health.js";
 import pnmRoute from "./routes/pnm.js";
+import authRoute from "./routes/auth.js";
+import { verifyToken } from './middleware/auth.js';
 
 const app = express();
 
@@ -19,7 +21,8 @@ app.use((req, res, next) => {
     next();
 })
 
+app.use(authRoute);
 app.use(healthRoute);
-app.use(pnmRoute);
+app.use(verifyToken, pnmRoute);
 
 app.listen(8080, '127.0.0.1');
