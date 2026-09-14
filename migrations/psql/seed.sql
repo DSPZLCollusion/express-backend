@@ -153,9 +153,9 @@ ON CONFLICT DO NOTHING;
 -- ---------------------------------------------------------------------------
 
 INSERT INTO users (username, email, password_hash) VALUES
-    ('admin_user', 'admin@example.com', '$2b$10$w0s2hBqV8k4eR5gO7/0eG.b1F5kKkV5V8F7U5XkYnE3mP2lQq1.ae'),
-    ('dic_user',   'dic@example.com',   '$2b$10$w0s2hBqV8k4eR5gO7/0eG.b1F5kKkV5V8F7U5XkYnE3mP2lQq1.ae'),
-    ('std_user',   'user@example.com',  '$2b$10$w0s2hBqV8k4eR5gO7/0eG.b1F5kKkV5V8F7U5XkYnE3mP2lQq1.ae')
+    ('admin_user', 'admin@example.com', '$2b$10$PZPTDZjfTglQ0hYD3Ljdw.eburMU3HOYTTC4dUWMXrf16xPC8Etri'),
+    ('dic_user',   'dic@example.com',   '$2b$10$PZPTDZjfTglQ0hYD3Ljdw.eburMU3HOYTTC4dUWMXrf16xPC8Etri'),
+    ('std_user',   'user@example.com',  '$2b$10$PZPTDZjfTglQ0hYD3Ljdw.eburMU3HOYTTC4dUWMXrf16xPC8Etri')
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO user_roles (user_id, role_name)
