@@ -26,6 +26,7 @@ export interface PnmDetails {
     email: string;
     phone_number: string;
     photo_url?: string;
+    last_contacted?: string | null;
     dorm?: Dorm;
     room_number?: string;
     street_address?: string;
@@ -44,6 +45,7 @@ export interface Pnm {
     email: string;
     phone_number: string;
     photo_url?: string;
+    last_contacted?: string | null;
 }
 
 export type CreatePnm = Omit<Pnm, 'id'>;
@@ -61,8 +63,9 @@ export function parseSql(req: PnmDetails): CreatePnmBody {
         class_year:   req.class_year,
         email:        req.email,
         phone_number: req.phone_number,
-        ...(req.status_type !== undefined && { status_type: req.status_type }),
-        ...(req.photo_url   !== undefined && { photo_url:   req.photo_url }),
+        ...(req.status_type    !== undefined && { status_type:    req.status_type }),
+        ...(req.photo_url      !== undefined && { photo_url:      req.photo_url }),
+        ...(req.last_contacted !== undefined && { last_contacted: req.last_contacted }),
     };
 
     const on_campus: OnCampusHousing | null =

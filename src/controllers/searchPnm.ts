@@ -13,6 +13,7 @@ type SearchQuery = {
     status_type?: string; // comma-separated StatusType values
     dorm?: string; // comma-separated Dorm values
     interests?: string; // comma-separated interest names
+    last_contacted?: string;
 };
 
 // Express parses a *repeated* query key (?class_year=A&class_year=B) as an
@@ -66,9 +67,9 @@ function addScalarFilters(b: Builder, q: SearchQuery) {
 // e.g. class_year=Freshman,Sophomore matches either one. That part was
 // already correct and is unchanged/shared by both routes below.
 const ENUM_CAST: Record<string, string> = {
-    'p.class_year':  'class_year',
+    'p.class_year': 'class_year',
     'p.status_type': 'status_type',
-    'p.dorm':        'dorm',
+    'p.dorm': 'dorm',
 };
 
 function addListFilter(b: Builder, column: string, raw: unknown) {
@@ -107,6 +108,32 @@ function addInterestsFilter(b: Builder, raw: unknown, mode: 'all' | 'any') {
     }
 }
 
+function addLastContactedFilter(b: Builder, raw: unknown) {
+    const list = toList(raw);
+    if (list.length === 0) return;
+
+    const parts: string[] = [];
+    for (const label of list) {
+        if (!(label in LAST_CONTACTED_MAP)) continue;
+        const interval = LAST_CONTACTED_MAP[label];
+        if (interval === null) {
+            parts.push('p.last_contacted IS NULL');
+        } else {
+            b.values.push(interval);
+            parts.push(`p.last_contacted >= NOW() - $${b.values.length}::interval`);
+        }
+    }
+    if (parts.length) b.conditions.push(`(${parts.join(' OR ')})`);
+}
+
+const LAST_CONTACTED_MAP: Record<string, string | null> = {
+    'NEVER': null,           // IS NULL
+    'Last Day': '1 day',
+    'Last Week': '7 days',
+    'Last Month': '30 days',
+};
+
+
 async function runSearch(res: Response, b: Builder, join: 'AND' | 'OR') {
     const where = b.conditions.length ? `WHERE ${b.conditions.join(` ${join} `)}` : '';
     try {
@@ -132,6 +159,7 @@ export async function searchPnmsAnd(req: Request, res: Response): Promise<void> 
     addListFilter(b, 'p.class_year', q.class_year);
     addListFilter(b, 'p.status_type', q.status_type);
     addListFilter(b, 'p.dorm', q.dorm);
+    addLastContactedFilter(b, q.last_contacted);
     addInterestsFilter(b, q.interests, 'all'); // must have ALL listed interests
 
     await runSearch(res, b, 'AND');
@@ -150,6 +178,7 @@ export async function searchPnmsOr(req: Request, res: Response): Promise<void> {
     addListFilter(b, 'p.class_year', q.class_year);
     addListFilter(b, 'p.status_type', q.status_type);
     addListFilter(b, 'p.dorm', q.dorm);
+    addLastContactedFilter(b, q.last_contacted);
     addInterestsFilter(b, q.interests, 'any'); // any ONE listed interest is enough
 
     await runSearch(res, b, 'OR');

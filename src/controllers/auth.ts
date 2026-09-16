@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from '../db.js';
+import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 interface UserRecord {
     user_id: string;
@@ -92,9 +93,12 @@ export async function login(req: Request, res: Response): Promise<void> {
         });
         return;
     } catch (error) {
-        console.error("Login error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
+}
+
+export function checkToken(req: AuthenticatedRequest, res: Response): void {
+    res.status(200).json({ valid: true, user: req.user });
 }
 
 export async function register(req: Request, res: Response) {

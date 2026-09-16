@@ -234,3 +234,24 @@ export async function deletePnm(req: Request, res: Response): Promise<void> {
         res.status(500).json({ error: 'Failed to retrieve pnm' });
     }
 }
+
+export async function updatePnmContacted(req: Request, res: Response): Promise<void> {
+    const param = req.params as RequestParams;
+    const pnmId = param.pnmId;
+    try {
+        const updated = await db.oneOrNone(`
+            UPDATE pnms
+            SET last_contacted = NOW()
+            WHERE id = $1
+            RETURNING id, last_contacted
+            `, [pnmId]);
+        if (!updated) {
+            res.status(404).json({ error: 'PNM not found' });
+            return;
+        }
+        res.status(200).json(updated);
+    } catch (err) {
+        console.error('getPnm error:', err);
+        res.status(500).json({ error: 'Failed to retrieve pnm' });
+    }
+}
