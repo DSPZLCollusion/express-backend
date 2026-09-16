@@ -56,14 +56,16 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS pnms (
-    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    first_name   VARCHAR(50)   NOT NULL,
-    last_name    VARCHAR(50)   NOT NULL,
-    class_year   class_year    NOT NULL,
-    status_type  status_type,
-    email        VARCHAR(254)  NOT NULL,
-    phone_number VARCHAR(20)   NOT NULL,
-    photo_url    VARCHAR(2048)
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    first_name     VARCHAR(50)   NOT NULL,
+    last_name      VARCHAR(50)   NOT NULL,
+    class_year     class_year    NOT NULL,
+    status_type    status_type,
+    email          VARCHAR(254)  NOT NULL UNIQUE,
+    phone_number   VARCHAR(20)   NOT NULL,
+    photo_url      VARCHAR(2048),
+    created_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    last_contacted TIMESTAMPTZ
 );
 
 -- ---------------------------------------------------------------------------
@@ -121,6 +123,7 @@ SELECT
     pnms.email,
     pnms.phone_number,
     pnms.photo_url,
+    pnms.last_contacted,
     on_campus_housing.dorm,
     on_campus_housing.room_number,
     off_campus_housing.street_address,
@@ -136,9 +139,14 @@ LEFT JOIN pnm_interests      ON pnms.id = pnm_interests.pnm_id
 LEFT JOIN interests          ON pnm_interests.interest_id = interests.id
 GROUP BY
     pnms.id,
+    pnms.first_name,
+    pnms.last_name,
+    pnms.class_year,
+    pnms.status_type,
     pnms.email,
     pnms.phone_number,
     pnms.photo_url,
+    pnms.last_contacted,
     on_campus_housing.dorm,
     on_campus_housing.room_number,
     off_campus_housing.street_address,
@@ -163,7 +171,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id     BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    role_name   role NOT NULL DEFAULT 'USER',
+    role_name   role   NOT NULL DEFAULT 'USER',
     PRIMARY KEY (user_id, role_name)
 );
 

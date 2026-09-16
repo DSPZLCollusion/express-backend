@@ -39,7 +39,7 @@ INSERT INTO pnms (first_name, last_name, class_year, status_type, email, phone_n
     ('Elena',   'Rivera',   'JUNIOR',      'DELTA', 'elena.rivera@uni.edu',   '555-101-0008'),
     ('Noah',    'Kim',      'SENIOR',      NULL,    'noah.kim@uni.edu',       '555-101-0009'),
     ('Priya',   'Sharma',   'FRESHMAN',    'SIGMA', 'priya.sharma@uni.edu',   '555-101-0010')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (email) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
 -- On-campus housing  (PNMs 1, 2, 3, 6, 7, 10)

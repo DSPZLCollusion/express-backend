@@ -10,6 +10,7 @@ SELECT
     pnms.email,
     pnms.phone_number,
     pnms.photo_url,
+    pnms.last_contacted,
     on_campus_housing.dorm,
     on_campus_housing.room_number,
     off_campus_housing.street_address,

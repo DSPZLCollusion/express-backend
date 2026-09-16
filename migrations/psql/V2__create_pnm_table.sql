@@ -9,5 +9,7 @@ CREATE TABLE pnms
     status_type  status_type,
     email        VARCHAR(254) NOT NULL,
     phone_number VARCHAR(20)  NOT NULL,
-    photo_url    VARCHAR(2048)
+    photo_url    VARCHAR(2048),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_contacted TIMESTAMPTZ,
 );
