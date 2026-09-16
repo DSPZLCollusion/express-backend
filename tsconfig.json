@@ -10,11 +10,9 @@
     "module": "nodenext",
     "target": "esnext",
     "moduleResolution": "nodenext",
-    // "types": [],
     // For nodejs:
     "lib": ["esnext"],
-    "types": ["node"],
-    // and npm install -D @types/node
+    // @types/node is auto-included when installed
 
     // Other Outputs
     "sourceMap": true,
