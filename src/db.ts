@@ -14,14 +14,12 @@ const pgp = pgPromise();
 //     user: process.env.POSTGRES_USER as string,
 //     password: process.env.POSTGRES_PASSWORD as string
 // });
-
 const rawUrl = process.env.POSTGRES_URL;
+
 if (!rawUrl) {
     throw new Error('POSTGRES_URL environment variable is not set');
 }
 
-
-const connectionString = rawUrl.replace(/[?&]sslmode=[^&]*/g, '').replace(/\?$/, '');
 
 console.log('DATABASE CONFIG:', {
     hasPostgresUrl: Boolean(process.env.POSTGRES_URL),
@@ -29,8 +27,9 @@ console.log('DATABASE CONFIG:', {
     vercelEnv: process.env.VERCEL_ENV,
 });
 
+
 const db = pgp({
-    connectionString,
+    connectionString: rawUrl,
     ssl: {
         rejectUnauthorized: false,
     },
