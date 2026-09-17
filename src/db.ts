@@ -19,17 +19,7 @@ const connectionString = process.env.POSTGRES_URL;
 if (!connectionString) {
     throw new Error('POSTGRES_URL environment variable is not set');
 }
-console.log(connectionString);
 
 const db = pgp(connectionString);
-
-try {
-    const result = await db.one("SELECT NOW()");
-    console.log("Database connected:", result);
-} catch (error) {
-    console.error("DATABASE ERROR:", error);
-}
-
-
 
 export default db;
