@@ -93,7 +93,11 @@ export async function login(req: Request, res: Response): Promise<void> {
         });
         return;
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        // res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({
+            error: error instanceof Error ? error.message : error,
+            stack: error instanceof Error ? error.stack : undefined,
+        });
     }
 }
 
