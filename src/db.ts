@@ -20,16 +20,20 @@ if (!rawUrl) {
     throw new Error('POSTGRES_URL environment variable is not set');
 }
 
-// Strip sslmode from the URL so pg-connection-string doesn't emit deprecation
-// warnings. SSL is controlled explicitly via the ssl config option below.
+
 const connectionString = rawUrl.replace(/[?&]sslmode=[^&]*/g, '').replace(/\?$/, '');
+
+console.log('DATABASE CONFIG:', {
+    hasPostgresUrl: Boolean(process.env.POSTGRES_URL),
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
+});
 
 const db = pgp({
     connectionString,
-    ssl: process.env.NODE_ENV === 'production'
-        ? { rejectUnauthorized: true }
-        : false
+    ssl: {
+        rejectUnauthorized: false,
+    },
 });
-
 
 export default db;
