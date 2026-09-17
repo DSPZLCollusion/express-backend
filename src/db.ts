@@ -15,11 +15,14 @@ const pgp = pgPromise();
 //     password: process.env.POSTGRES_PASSWORD as string
 // });
 
-const connectionString = process.env.POSTGRES_URL;
-if (!connectionString) {
+const rawUrl = process.env.POSTGRES_URL;
+if (!rawUrl) {
     throw new Error('POSTGRES_URL environment variable is not set');
 }
 
+// Strip sslmode from the URL so pg-connection-string doesn't emit deprecation
+// warnings. SSL is controlled explicitly via the ssl config option below.
+const connectionString = rawUrl.replace(/[?&]sslmode=[^&]*/g, '').replace(/\?$/, '');
 
 const db = pgp({
     connectionString,
