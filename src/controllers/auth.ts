@@ -67,21 +67,6 @@ export async function login(req: Request, res: Response): Promise<void> {
         return;
     }
     try {
-        const result = await db.one('SELECT NOW() AS now');
-        console.log('DATABASE CONNECTED:', result);
-
-        // your actual query...
-    } catch (error) {
-        console.error('DATABASE ERROR:', error);
-
-        res.status(500).json({
-            error: error instanceof Error
-                ? error.message
-                : JSON.stringify(error),
-        });
-    }
-
-    try {
         const user = await findUserByUsername(username);
         if (!user) {
             res.status(401).json({ error: "Invalid username or password" });
@@ -106,13 +91,9 @@ export async function login(req: Request, res: Response): Promise<void> {
                 roles: user.roles
             }
         });
-        return;
     } catch (error) {
-        // res.status(500).json({ error: "Internal server error" });
-        res.status(500).json({
-            error: error instanceof Error ? error.message : error,
-            stack: error instanceof Error ? error.stack : undefined,
-        });
+        console.error('Login error:', error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
