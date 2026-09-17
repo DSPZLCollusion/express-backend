@@ -25,10 +25,7 @@ app.use(authRoute);
 app.use(healthRoute);
 app.use(verifyToken, pnmRoute);
 
-// Local dev only — Vercel manages the listener in production
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(8080, '127.0.0.1');
-}
+app.listen(8080, '127.0.0.1');
 
 export default app;
 
