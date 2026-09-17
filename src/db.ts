@@ -20,6 +20,13 @@ if (!connectionString) {
     throw new Error('POSTGRES_URL environment variable is not set');
 }
 
-const db = pgp(connectionString);
+
+const db = pgp({
+    connectionString,
+    ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: true }
+        : false
+});
+
 
 export default db;
