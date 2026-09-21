@@ -5,6 +5,7 @@ import healthRoute from "./routes/health.js";
 import pnmRoute from "./routes/pnm.js";
 import authRoute from "./routes/auth.js";
 import { verifyToken } from './middleware/auth.js';
+import photoRoute from "./routes/photo.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 app.use(authRoute);
 app.use(healthRoute);
 app.use(verifyToken, pnmRoute);
+app.use(verifyToken, photoRoute);
 
 app.listen(8080, '127.0.0.1');
 
