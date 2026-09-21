@@ -3,6 +3,6 @@ import { uploadPhoto } from '../controllers/photo.js';
 
 const router = Router();
 
-router.post('/upload_image', uploadPhoto);
+router.post('/photo/upload_image', uploadPhoto);
 
 export default router;
