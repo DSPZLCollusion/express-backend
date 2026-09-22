@@ -68,6 +68,9 @@ export async function uploadPhoto(req: ExpressRequest, res: Response): Promise<v
                     allowedOrigins: ALLOWED_ORIGINS,
                 };
             },
+            onUploadCompleted: async () => {
+                // No post-upload server-side work needed yet.
+            },
         });
 
         res.status(200).json(result);
