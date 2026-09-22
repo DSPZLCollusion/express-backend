@@ -33,7 +33,7 @@ function toWebRequest(req: ExpressRequest): globalThis.Request {
     // the request URL to derive the upload endpoint, so we must use the
     // forwarded headers to reconstruct the real public URL.
     const proto = (req.get('x-forwarded-proto') ?? req.protocol).split(',').at(0)!.trim();
-    const host  = (req.get('x-forwarded-host')  ?? req.get('host') ?? 'localhost').split(',').at(0)!.trim();
+    const host = (req.get('x-forwarded-host') ?? req.get('host') ?? 'localhost').split(',').at(0)!.trim();
     const url = `${proto}://${host}${req.originalUrl}`;
 
     return new globalThis.Request(url, {
