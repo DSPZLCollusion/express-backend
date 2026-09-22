@@ -9,7 +9,11 @@ import photoRoute from "./routes/photo.js";
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+    verify: (req, _res, buf) => {
+        (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+    },
+}));
 
 const allowedOrigins = [
     'https://dspzlcollusion.vercel.app',
