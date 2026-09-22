@@ -6,6 +6,12 @@ import { verifyJwt } from '../middleware/auth.js';
 const ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 4 * 1024 * 1024;
 const PATH_PREFIX = 'pnm-photos/';
+const ALLOWED_ORIGINS = [
+    'https://dspzlcollusion.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:8080',
+];
 
 function toWebRequest(req: ExpressRequest): globalThis.Request {
     const headers = new Headers();
@@ -59,6 +65,7 @@ export async function uploadPhoto(req: ExpressRequest, res: Response): Promise<v
                 return {
                     allowedContentTypes: ALLOWED_CONTENT_TYPES,
                     maximumSizeInBytes: MAX_BYTES,
+                    allowedOrigins: ALLOWED_ORIGINS,
                 };
             },
         });
