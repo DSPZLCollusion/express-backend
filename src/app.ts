@@ -36,11 +36,9 @@ app.use((req, res, next) => {
 
 app.use(authRoute);
 app.use(healthRoute);
-app.use(verifyToken, pnmRoute);
-// Photo route handles its own auth inside onBeforeGenerateToken via clientPayload.
-// The Vercel Blob SDK's Phase 1 token-fetch POST carries no Authorization header,
-// so wrapping it with verifyToken would reject every upload before it starts.
 app.use(photoRoute);
+app.use(verifyToken, pnmRoute);
+
 
 app.listen(8080, '127.0.0.1');
 

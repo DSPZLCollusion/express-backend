@@ -1,8 +1,7 @@
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
-import jwt from 'jsonwebtoken';
 
 import type { Request as ExpressRequest, Response } from 'express';
-import type { TokenPayload } from '../middleware/auth.js';
+import { verifyJwt } from '../middleware/auth.js';
 
 const ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -63,17 +62,14 @@ export async function uploadPhoto(req: ExpressRequest, res: Response): Promise<v
         const result = await handleUpload({
             body,
             request: toWebRequest(req),
-            onBeforeGenerateToken: async (pathname, clientPayload) => {
-                // Verify the JWT forwarded via clientPayload (the upload() `headers`
-                // option only reaches this endpoint, not the direct-to-Vercel PUT,
-                // but clientPayload is the well-established pattern for this and
-                // keeps the auth check independent of that detail).
-                const secret = process.env.JWT_SECRET;
-                if (!secret) throw new Error('Server configuration error.');
-
-                if (!clientPayload) throw new Error('Unauthorized.');
+            onBeforeGenerateToken: async (pathname) => {
+                const authHeader = req.headers['authorization'];
+                const token = authHeader?.startsWith('Bearer ')
+                    ? authHeader.slice(7)
+                    : null;
+                if (!token) throw new Error('Unauthorized.');
                 try {
-                    jwt.verify(clientPayload, secret, { algorithms: ['HS256'] }) as TokenPayload;
+                    verifyJwt(token);
                 } catch {
                     throw new Error('Unauthorized.');
                 }
