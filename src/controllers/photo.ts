@@ -7,19 +7,6 @@ const ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 4 * 1024 * 1024;
 const PATH_PREFIX = 'pnm-photos/';
 
-/**
- * handleUpload expects a standard Fetch API Request (it calls
- * request.headers.get(...) when verifying the signature on the automatic
- * 'blob.upload-completed' webhook callback). Express's req is not that —
- * req.headers is a plain object with no .get(), so passing req directly
- * throws a TypeError once Vercel calls back after an upload finishes.
- *
- * The webhook's signature is computed over the exact bytes Vercel sent, so
- * this must use the raw, unparsed body — re-serializing req.body with
- * JSON.stringify can change whitespace/key order/number formatting just
- * enough to make a valid signature look invalid. See routes/photo.ts for
- * the middleware change that captures req.rawBody.
- */
 function toWebRequest(req: ExpressRequest): globalThis.Request {
     const headers = new Headers();
     for (const [key, value] of Object.entries(req.headers)) {
@@ -29,18 +16,13 @@ function toWebRequest(req: ExpressRequest): globalThis.Request {
 
     const rawBody = (req as ExpressRequest & { rawBody?: Buffer }).rawBody;
     if (!rawBody) {
-        // Falls back to a body-less request. Token generation (phase 1) still
-        // works since it doesn't read the body, but webhook signature
-        // verification (phase 2) will fail without the exact original bytes.
         console.warn(
             'photo upload: req.rawBody is missing — add the express.json() verify option ' +
             'described in routes/photo.ts, or webhook signature checks will fail.',
         );
     }
 
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const url = `${protocol}://${host}${req.originalUrl}`;
+    const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
     return new globalThis.Request(url, {
         method: req.method,
@@ -62,14 +44,10 @@ export async function uploadPhoto(req: ExpressRequest, res: Response): Promise<v
         const result = await handleUpload({
             body,
             request: toWebRequest(req),
-            onBeforeGenerateToken: async (pathname) => {
-                const authHeader = req.headers['authorization'];
-                const token = authHeader?.startsWith('Bearer ')
-                    ? authHeader.slice(7)
-                    : null;
-                if (!token) throw new Error('Unauthorized.');
+            onBeforeGenerateToken: async (pathname, clientPayload) => {
+                if (!clientPayload) throw new Error('Unauthorized.');
                 try {
-                    verifyJwt(token);
+                    verifyJwt(clientPayload);
                 } catch {
                     throw new Error('Unauthorized.');
                 }
@@ -81,7 +59,6 @@ export async function uploadPhoto(req: ExpressRequest, res: Response): Promise<v
                 return {
                     allowedContentTypes: ALLOWED_CONTENT_TYPES,
                     maximumSizeInBytes: MAX_BYTES,
-                    addRandomSuffix: true,
                 };
             },
         });
@@ -89,7 +66,6 @@ export async function uploadPhoto(req: ExpressRequest, res: Response): Promise<v
         res.status(200).json(result);
     } catch (error) {
         const message = (error as Error).message;
-        // Surface auth and validation errors as 401/400 without leaking internals.
         if (message === 'Unauthorized.') {
             res.status(401).json({ error: 'Unauthorized.' });
         } else if (message === 'Invalid upload path.' || message === 'Server configuration error.') {
