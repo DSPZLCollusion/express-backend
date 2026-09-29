@@ -13,6 +13,7 @@
     "migrate": "node-pg-migrate up"
   },
   "dependencies": {
+    "@jest/types": "^30.5.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.3.0",
     "@vercel/blob": "^2.8.0",
@@ -27,10 +28,12 @@
     "ws": "^8.21.3"
   },
   "devDependencies": {
+    "@swc/core": "^1.16.2",
+    "@swc/jest": "^0.2.39",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/supertest": "^7.2.1",
-    "jest": "^30.4.2",
+    "jest": "^30.5.2",
     "node-pg-migrate": "^9.0.0",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2"
