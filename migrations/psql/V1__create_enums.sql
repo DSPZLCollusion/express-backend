@@ -48,3 +48,5 @@ CREATE TYPE role as ENUM (
     'DIC',
     'ADMIN'
 );
+
+CREATE TYPE attendance_status AS ENUM ('ATTENDED', 'RSVPD', 'NO_SHOW');
