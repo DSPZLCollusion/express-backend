@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { CreatePnmBody, CreatePnm, OnCampusHousing, OffCampusHousing } from '../models/pnm.js';
+import type { CreatePnmBody, CreatePnm, OnCampusHousing, OffCampusHousing, EventDetails } from '../models/pnm.js';
 import { parseSql } from '../models/pnm.js';
 
 import db from '../db.js';
@@ -8,12 +8,61 @@ type RequestParams = { pnmId: string };
 type RequestBody = { text: string };
 
 export async function getAllPnms(req: Request, res: Response): Promise<void> {
+    const { cursor } = req.query;
+    const limit = 25;
+
     try {
-        const pnms = await db.any(`SELECT * FROM pnm_details`);
-        res.status(200).json(pnms);
+        let result;
+
+        if (typeof cursor === 'string') {
+            const decoded = JSON.parse(
+                Buffer.from(cursor, 'base64url').toString('utf8')
+            );
+
+            result = await db.any(
+                `
+                SELECT *
+                FROM pnm_details
+                WHERE (created_at, id) < ($1, $2::int)
+                ORDER BY created_at DESC, id DESC
+                LIMIT $3
+                `,
+                [decoded.created_at as Date, decoded.id, limit + 1]
+            );
+        } else {
+            result = await db.any(
+                `
+                SELECT *
+                FROM pnm_details
+                ORDER BY created_at DESC, id DESC
+                LIMIT $1
+                `,
+                [limit + 1]
+            );
+        }
+        const hasMore = result.length > limit;
+        const rows = result.slice(0, limit);
+
+        let nextCursor = null;
+
+        if (hasMore) {
+            const last = rows[rows.length - 1];
+
+            nextCursor = Buffer.from(
+                JSON.stringify({
+                    created_at: last.created_at,
+                    id: last.id
+                })
+            ).toString('base64url');
+        }
+
+        res.status(200).json({
+            data: rows,
+            nextCursor
+        });
     } catch (err) {
-        console.error('getAllPnms error:', err);
-        res.status(500).json({ error: 'Failed to retrieve pnms' });
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 }
 
@@ -39,6 +88,7 @@ export async function createPnm(req: Request, res: Response): Promise<void> {
     const off_campus: OffCampusHousing | null = body.off_campus;
     const on_campus: OnCampusHousing | null = body.on_campus;
     const interests: string[] | null = body.interests;
+    const events: EventDetails[] | null = body.events;
 
     if (!info.first_name || !info.last_name || !info.email) {
         res.status(400).json({ error: 'first_name, last_name, and email are required' });
@@ -107,6 +157,17 @@ export async function createPnm(req: Request, res: Response): Promise<void> {
                 }
             }
 
+            if (events && events.length > 0) {
+                for (const event of events) {
+                    await t.none(
+                        `INSERT INTO pnm_attendance (pnm_id, event_id, status)
+                        VALUES ($1, $2, $3)
+                        ON CONFLICT DO NOTHING`,
+                        [pnmId, event.id, event.event_status]
+                    );
+                }
+            }
+
             return newPnm;
         });
 
@@ -125,6 +186,7 @@ export async function updatePnm(req: Request, res: Response): Promise<void> {
     const off_campus: OffCampusHousing | null = body.off_campus;
     const on_campus: OnCampusHousing | null = body.on_campus;
     const interests: string[] | null = body.interests;
+    const events: EventDetails[] | null = body.events;
 
     if (!info.first_name || !info.last_name || !info.email) {
         res.status(400).json({ error: 'first_name, last_name, and email are required' });
@@ -195,6 +257,18 @@ export async function updatePnm(req: Request, res: Response): Promise<void> {
                          VALUES ($1, $2)
                          ON CONFLICT DO NOTHING`,
                         [pnmId, interestId]
+                    );
+                }
+            }
+
+            await t.none('DELETE FROM pnm_attendance WHERE pnm_id = $1', [pnmId]);
+            if (events && events.length > 0) {
+                for (const event of events) {
+                    await t.none(
+                        `INSERT INTO pnm_attendance (pnm_id, event_id, status)
+                        VALUES ($1, $2, $3)
+                        ON CONFLICT DO NOTHING`,
+                        [pnmId, event.id, event.event_status]
                     );
                 }
             }

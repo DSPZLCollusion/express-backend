@@ -1,8 +1,14 @@
+export interface EventDetails {
+    id: number;
+    event_status: string;
+}
+
 export interface CreatePnmBody {
     info: CreatePnm;
     on_campus: OnCampusHousing | null;
     off_campus: OffCampusHousing | null;
     interests: string[] | null;
+    events: EventDetails[] | null;
 }
 
 export interface OnCampusHousing {
@@ -34,6 +40,7 @@ export interface PnmDetails {
     state?: string;
     zip_code?: string;
     interests: string[];
+    events: EventDetails[];
 }
 
 export interface Pnm {
@@ -50,21 +57,21 @@ export interface Pnm {
 
 export type CreatePnm = Omit<Pnm, 'id'>;
 
-export type ClassYear  = 'FRESHMAN' | 'SOPHOMORE' | 'JUNIOR' | 'SENIOR' | 'SUPER_SENIOR';
+export type ClassYear = 'FRESHMAN' | 'SOPHOMORE' | 'JUNIOR' | 'SENIOR' | 'SUPER_SENIOR';
 export type StatusType = 'DELTA' | 'SIGMA' | 'PHI';
-export type Dorm       = 'SPEED' | 'BSB' | 'BLUMBERG' | 'MEES' | 'DEMING' |
-                         'SCHARPENBERG' | 'LAKESIDE' | 'PERCOPO' |
-                         'APARTMENTS WEST' | 'APARTMENTS EAST' | 'TBA';
+export type Dorm = 'SPEED' | 'BSB' | 'BLUMBERG' | 'MEES' | 'DEMING' |
+    'SCHARPENBERG' | 'LAKESIDE' | 'PERCOPO' |
+    'APARTMENTS WEST' | 'APARTMENTS EAST' | 'TBA';
 
 export function parseSql(req: PnmDetails): CreatePnmBody {
     const info: CreatePnm = {
-        first_name:   req.first_name,
-        last_name:    req.last_name,
-        class_year:   req.class_year,
-        email:        req.email,
+        first_name: req.first_name,
+        last_name: req.last_name,
+        class_year: req.class_year,
+        email: req.email,
         phone_number: req.phone_number,
-        ...(req.status_type    !== undefined && { status_type:    req.status_type }),
-        ...(req.photo_url      !== undefined && { photo_url:      req.photo_url }),
+        ...(req.status_type !== undefined && { status_type: req.status_type }),
+        ...(req.photo_url !== undefined && { photo_url: req.photo_url }),
         ...(req.last_contacted !== undefined && { last_contacted: req.last_contacted }),
     };
 
@@ -76,17 +83,18 @@ export function parseSql(req: PnmDetails): CreatePnmBody {
     const off_campus: OffCampusHousing | null =
         req.street_address && req.city && req.state && req.zip_code
             ? {
-                  street_address: req.street_address,
-                  city:           req.city,
-                  state:          req.state,
-                  zip_code:       req.zip_code,
-              }
+                street_address: req.street_address,
+                city: req.city,
+                state: req.state,
+                zip_code: req.zip_code,
+            }
             : null;
 
     return {
         info,
         on_campus,
         off_campus,
-        interests: req.interests.length ? req.interests : null,
+        interests: req.interests?.length ? req.interests : null,
+        events: req.events?.length ? req.events : null,
     };
 }
