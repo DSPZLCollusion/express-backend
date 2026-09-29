@@ -36,11 +36,11 @@ LEFT JOIN (
         pnm_attendance.pnm_id,
         json_agg(
             json_build_object(
-                'event_id',   events.id,
-                'event_name', events.event_name,
-                'event_date', events.event_date,
-                'status',     pnm_attendance.status
-            ) ORDER BY events.event_date DESC
+                    'id',           events.id,
+                    'event_name',   events.event_name,
+                    'event_date',   events.event_date,
+                    'event_status', pnm_attendance.status
+                ) ORDER BY events.event_date DESC
         ) AS events
     FROM pnm_attendance
     JOIN events ON pnm_attendance.event_id = events.id
