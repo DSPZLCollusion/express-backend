@@ -6,6 +6,7 @@ import pnmRoute from "./routes/pnm.js";
 import authRoute from "./routes/auth.js";
 import { verifyToken } from './middleware/auth.js';
 import photoRoute from "./routes/photo.js";
+import eventRoute from "./routes/events.js";
 
 const app = express();
 
@@ -24,7 +25,7 @@ const allowedOrigins = [
 
 app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin && (allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin))) {
+    if (origin && allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     } else {
         res.setHeader('Access-Control-Allow-Origin', 'https://dspzlcollusion.vercel.app');
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 app.use(authRoute);
 app.use(healthRoute);
 app.use(photoRoute);
+app.use(verifyToken, eventRoute)
 app.use(verifyToken, pnmRoute);
 
 

@@ -21,15 +21,16 @@ if (!rawUrl) {
 }
 
 
-console.log('DATABASE CONFIG:', {
-    hasPostgresUrl: Boolean(process.env.POSTGRES_URL),
-    nodeEnv: process.env.NODE_ENV,
-    vercelEnv: process.env.VERCEL_ENV,
-});
+// console.log('DATABASE CONFIG:', {
+//     hasPostgresUrl: Boolean(process.env.POSTGRES_URL),
+//     nodeEnv: process.env.NODE_ENV,
+//     vercelEnv: process.env.VERCEL_ENV,
+// });
 
 
 const db = pgp({
     connectionString: rawUrl,
+
     ssl: {
         rejectUnauthorized: false,
     },

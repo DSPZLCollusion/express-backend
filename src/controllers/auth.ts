@@ -102,5 +102,36 @@ export function checkToken(req: AuthenticatedRequest, res: Response): void {
 }
 
 export async function register(req: Request, res: Response) {
+    const { username, email, password } = req.body;
 
+    if (!username || !password || !email) {
+        res.status(400).json({ error: "Username, email, and password are required" });
+        return;
+    }
+
+    try {
+        const existing = await db.oneOrNone(`SELECT * FROM users WHERE username=$1`, [username]);
+        if (existing) {
+            res.status(409).json({ error: "Username already taken" });
+            return;
+        }
+
+        const password_hash = await hashPassword(password);
+        const newUser = await db.one<UserRecord>(
+            `INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING user_id, username, email`,
+            [username, email, password_hash]
+        );
+        res.status(201).json({
+            user: {
+                userId: newUser.user_id,
+                username: newUser.username,
+                email: newUser.email
+            }
+        });
+    } catch (error) {
+        console.error('Register error:', error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 }
