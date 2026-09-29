@@ -1,0 +1,6 @@
+CREATE TABLE events (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    event_name        VARCHAR(100)  NOT NULL,
+    event_date  TIMESTAMPTZ   NOT NULL,
+    created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
